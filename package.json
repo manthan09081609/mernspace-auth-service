@@ -2,14 +2,17 @@
   "name": "service-template",
   "version": "1.0.0",
   "description": "A Service Template Project",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "node src/server.js",
+    "format:check": "prettier . --check",
+    "format:fix": "prettier . --write"
   },
   "author": "Manthan Sharma <mayank9870866130@gmail.com>",
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^20.12.2",
+    "prettier": "3.2.5",
     "typescript": "^5.4.3"
   }
 }
