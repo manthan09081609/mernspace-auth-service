@@ -11,6 +11,12 @@
     "lint:fix": "eslint . --fix",
     "prepare": "husky"
   },
+  "lint-staged": {
+    "*.ts": [
+      "npm run lint:fix",
+      "npm run format:fix"
+    ]
+  },
   "author": "Manthan Sharma <mayank9870866130@gmail.com>",
   "license": "ISC",
   "devDependencies": {
@@ -22,5 +28,8 @@
     "husky": "^9.0.11",
     "prettier": "3.2.5",
     "typescript": "^5.4.3"
+  },
+  "dependencies": {
+    "lint-staged": "^15.2.2"
   }
 }
