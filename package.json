@@ -30,6 +30,7 @@
     "typescript": "^5.4.3"
   },
   "dependencies": {
+    "dotenv": "^16.4.5",
     "lint-staged": "^15.2.2"
   }
 }
