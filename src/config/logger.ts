@@ -19,6 +19,7 @@ const logger = winston.createLogger({
       dirname: "logs",
       filename: "error.log",
       level: "error",
+
       format: winston.format.combine(
         winston.format.timestamp(),
         winston.format.json(),
