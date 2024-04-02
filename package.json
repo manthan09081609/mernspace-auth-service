@@ -6,12 +6,18 @@
   "scripts": {
     "dev": "node src/server.js",
     "format:check": "prettier . --check",
-    "format:fix": "prettier . --write"
+    "format:fix": "prettier . --write",
+    "lint:check": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "author": "Manthan Sharma <mayank9870866130@gmail.com>",
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^20.12.2",
+    "@typescript-eslint/eslint-plugin": "^7.4.0",
+    "@typescript-eslint/parser": "^7.4.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
     "prettier": "3.2.5",
     "typescript": "^5.4.3"
   }
