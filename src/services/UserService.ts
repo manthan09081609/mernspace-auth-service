@@ -1,5 +1,6 @@
-import createHttpError from "http-errors";
+import bcrypt from "bcrypt";
 import { Repository } from "typeorm";
+import createHttpError from "http-errors";
 
 import { User } from "../entity/User";
 import { UserRegisterationData } from "../types";
@@ -13,15 +14,25 @@ export class UserService {
     email,
     password,
   }: UserRegisterationData) {
+    const user = await this.userRepository.findOne({
+      where: { email: email },
+    });
+    if (user) {
+      const err = createHttpError(400, "email is already exists!");
+      throw err;
+    }
+
     try {
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
       return await this.userRepository.save({
         firstName,
         lastName,
         email,
-        password,
+        password: hashedPassword,
         role: Roles.CUSTOMER,
       });
-    } catch (err) {
+    } catch (error) {
       const databaseError = createHttpError(
         500,
         "failed to store the user in database",
