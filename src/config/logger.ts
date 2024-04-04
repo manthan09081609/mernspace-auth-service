@@ -4,7 +4,7 @@ import { Config } from ".";
 const logger = winston.createLogger({
   level: "info",
   defaultMeta: {
-    serviceName: "service-template",
+    serviceName: "auth-service",
   },
   transports: [
     new winston.transports.Console({
