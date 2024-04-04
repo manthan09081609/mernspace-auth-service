@@ -1,8 +1,26 @@
 import request from "supertest";
+import { DataSource } from "typeorm";
 
 import app from "../../src/app";
+import { User } from "../../src/entity/User";
+import { AppDataSource } from "../../src/config/data-source";
+import { truncateTables } from "../utils";
 
 describe("POST /auth/register", () => {
+  let connection: DataSource;
+
+  beforeAll(async () => {
+    connection = await AppDataSource.initialize();
+  });
+
+  beforeEach(async () => {
+    await truncateTables(connection);
+  });
+
+  afterAll(async () => {
+    await connection.destroy();
+  });
+
   describe("All fields given", () => {
     it("should return 201 status code", async () => {
       // Arrange
@@ -48,12 +66,16 @@ describe("POST /auth/register", () => {
       };
 
       // Act
-      const response = await request(app).post("/auth/register").send(userData);
+      await request(app).post("/auth/register").send(userData);
+
+      const userRepository = connection.getRepository(User);
+      const users = await userRepository.find();
 
       // Assert
-      expect(
-        (response.headers as Record<string, string>)["content-type"],
-      ).toEqual(expect.stringContaining("json"));
+      expect(users).toHaveLength(1);
+      expect(users[0].firstName).toBe(userData.firstName);
+      expect(users[0].lastName).toBe(userData.lastName);
+      expect(users[0].email).toBe(userData.email);
     });
   });
   describe("Fields are missing", () => {});
