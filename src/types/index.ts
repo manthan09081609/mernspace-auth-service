@@ -10,3 +10,7 @@ export interface UserRegisterationData {
 export interface RegisterUserRequest extends Request {
   body: UserRegisterationData;
 }
+
+export interface RefreshTokenData {
+  id: number;
+}
