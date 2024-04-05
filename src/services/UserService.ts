@@ -8,17 +8,23 @@ import { Roles } from "../constants";
 
 export class UserService {
   constructor(private userRepository: Repository<User>) {}
+
   async create({
     firstName,
     lastName,
     email,
     password,
   }: UserRegisterationData) {
-    const user = await this.userRepository.findOne({
-      where: { email: email },
-    });
-    if (user) {
-      const err = createHttpError(400, "email is already exists!");
+    try {
+      const user = await this.userRepository.findOne({
+        where: { email: email },
+      });
+      if (user) {
+        const err = createHttpError(400, "email is already exists!");
+        throw err;
+      }
+    } catch (error) {
+      const err = createHttpError(400, "error while registering the user");
       throw err;
     }
 
@@ -38,6 +44,18 @@ export class UserService {
         "failed to store the user in database",
       );
       throw databaseError;
+    }
+  }
+
+  async findByEmail(email: string) {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { email: email },
+      });
+      return user;
+    } catch (error) {
+      const err = createHttpError(500, "database error");
+      throw err;
     }
   }
 }

@@ -11,6 +11,15 @@ export interface RegisterUserRequest extends Request {
   body: UserRegisterationData;
 }
 
+export interface UserLoginData {
+  email: string;
+  password: string;
+}
+
+export interface LoginUserRequest extends Request {
+  body: UserLoginData;
+}
+
 export interface RefreshTokenData {
   id: number;
 }

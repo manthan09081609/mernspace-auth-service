@@ -72,4 +72,18 @@ export class TokenService {
       throw error;
     }
   }
+
+  async deleteRefreshTokens(userId: number) {
+    try {
+      return await this.refreshTokenRepository
+        .createQueryBuilder()
+        .delete()
+        .from(RefreshToken)
+        .where("userId = :userId", { userId })
+        .execute();
+    } catch (err) {
+      const error = createHttpError(500, "database error");
+      throw error;
+    }
+  }
 }
