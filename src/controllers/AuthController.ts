@@ -197,4 +197,19 @@ export class AuthController {
       return next(err);
     }
   }
+
+  async logout(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      await this.tokenService.revokeRefreshToken(Number(req.auth.id));
+
+      this.logger.info("user has been logged out", { id: req.auth.sub });
+
+      res.clearCookie("accessToken");
+      res.clearCookie("refreshToken");
+
+      return res.status(200).json({});
+    } catch (err) {
+      return next(err);
+    }
+  }
 }
