@@ -3,7 +3,7 @@ import { validationResult } from "express-validator";
 import { NextFunction, Response } from "express";
 import { JwtPayload } from "jsonwebtoken";
 
-import { LoginUserRequest, RegisterUserRequest } from "../types";
+import { AuthRequest, LoginUserRequest, RegisterUserRequest } from "../types";
 import { UserService } from "../services/UserService";
 
 import { TokenService } from "../services/TokenService";
@@ -138,6 +138,21 @@ export class AuthController {
     } catch (err) {
       next(err);
       return;
+    }
+  }
+
+  async self(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const user = await this.userService.findById(Number(req.auth.sub));
+
+      if (!user) {
+        const error = createHttpError(400, "user not found");
+        return next(error);
+      }
+
+      return res.json({ ...user, password: undefined });
+    } catch (err) {
+      return next(err);
     }
   }
 }

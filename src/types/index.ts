@@ -23,3 +23,10 @@ export interface LoginUserRequest extends Request {
 export interface RefreshTokenData {
   id: number;
 }
+
+export interface AuthRequest extends Request {
+  auth: {
+    sub: string;
+    role: string;
+  };
+}

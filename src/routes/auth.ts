@@ -1,18 +1,22 @@
 import express, { NextFunction, Request, Response } from "express";
 
-import { AppDataSource } from "../config/data-source";
 import logger from "../config/logger";
+import { AppDataSource } from "../config/data-source";
+
 import { AuthController } from "../controllers/AuthController";
 
 import { User } from "../entity/User";
 import { RefreshToken } from "../entity/RefreshToken";
 
-import registerValidator from "../validators/register-validator";
 import loginValidator from "../validators/login-validator";
+import registerValidator from "../validators/register-validator";
 
 import { UserService } from "../services/UserService";
 import { TokenService } from "../services/TokenService";
 import { CredentialService } from "../services/CredentialService";
+
+import authenticate from "../middlewares/authenticate";
+import { AuthRequest } from "../types";
 
 const router = express.Router();
 
@@ -42,6 +46,13 @@ router.post(
   loginValidator,
   (req: Request, res: Response, next: NextFunction) =>
     authController.login(req, res, next),
+);
+
+router.get(
+  "/self",
+  authenticate,
+  (req: Request, res: Response, next: NextFunction) =>
+    authController.self(req as AuthRequest, res, next),
 );
 
 export default router;
