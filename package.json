@@ -12,7 +12,15 @@
     "lint:fix": "eslint . --fix",
     "prepare": "husky",
     "start": "ts-node src/index.ts",
-    "typeorm": "typeorm-ts-node-commonjs"
+    "dev-migration:generate": "cross-env NODE_ENV=dev typeorm-ts-node-commonjs migration:generate",
+    
+    "dev-migration:run": "cross-env NODE_ENV=dev typeorm-ts-node-commonjs migration:run",
+    "dev-migration:create": "cross-env NODE_ENV=dev typeorm-ts-node-commonjs migration:create",
+
+    "migration:generate": "cross-env NODE_ENV=prod typeorm-ts-node-commonjs migration:generate",
+    "migration:run": "cross-env NODE_ENV=prod typeorm-ts-node-commonjs migration:run",
+    "migration:create": "cross-env NODE_ENV=prod typeorm-ts-node-commonjs migration:create"
+
   },
   "lint-staged": {
     "*.ts": [
