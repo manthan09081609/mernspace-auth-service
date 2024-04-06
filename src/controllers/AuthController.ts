@@ -105,8 +105,6 @@ export class AuthController {
         return next(err);
       }
 
-      await this.tokenService.deleteRefreshTokens(user.id);
-
       const payload: JwtPayload = {
         sub: String(user.id),
         role: user.role,
@@ -151,6 +149,50 @@ export class AuthController {
       }
 
       return res.json({ ...user, password: undefined });
+    } catch (err) {
+      return next(err);
+    }
+  }
+
+  async refresh(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const payload: JwtPayload = {
+        sub: req.auth.sub,
+        role: req.auth.role,
+      };
+
+      const user = await this.userService.findById(Number(req.auth.sub));
+
+      if (!user) {
+        const error = createHttpError(400, "user not registered");
+        return next(error);
+      }
+
+      await this.tokenService.revokeRefreshToken(Number(req.auth.id));
+
+      const accessToken = this.tokenService.generateAccessToken(payload);
+      const refreshToken = await this.tokenService.generateRefreshToken(
+        payload,
+        user,
+      );
+
+      res.cookie("accessToken", accessToken, {
+        domain: "localhost",
+        sameSite: "strict",
+        maxAge: 1000 * 60 * 60,
+        httpOnly: true,
+      });
+
+      res.cookie("refreshToken", refreshToken, {
+        domain: "localhost",
+        sameSite: "strict",
+        maxAge: 1000 * 60 * 60 * 24 * 365,
+        httpOnly: true,
+      });
+
+      this.logger.info("token has been refreshed", { id: user.id });
+
+      res.status(200).json({ id: user.id });
     } catch (err) {
       return next(err);
     }

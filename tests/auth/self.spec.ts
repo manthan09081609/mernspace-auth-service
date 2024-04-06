@@ -62,6 +62,19 @@ describe("GET /auth/self", () => {
       expect(response.statusCode).toBe(200);
     });
 
+    it("should return 401 status code if token not valid", async () => {
+      // Arrange
+
+      // Act
+      const response = await request(app)
+        .get("/auth/self")
+        .set("Cookie", [`accessToken=${"accessToken"};`])
+        .send();
+
+      // Assert
+      expect(response.statusCode).toBe(401);
+    });
+
     it("should return user data", async () => {
       // Arrange
 
@@ -99,10 +112,5 @@ describe("GET /auth/self", () => {
       // Assert
       expect(response.statusCode).toBe(401);
     });
-  });
-
-  describe("Fields are not in proper format", () => {
-    // todo:should return 403 status code if token format is not correct
-    it.todo("should return 403 status code if token format is not correct");
   });
 });

@@ -15,16 +15,18 @@ export class UserService {
     email,
     password,
   }: UserRegisterationData) {
+    let user;
     try {
-      const user = await this.userRepository.findOne({
+      user = await this.userRepository.findOne({
         where: { email: email },
       });
-      if (user) {
-        const err = createHttpError(400, "email is already exists!");
-        throw err;
-      }
     } catch (error) {
       const err = createHttpError(400, "error while registering the user");
+      throw err;
+    }
+
+    if (user) {
+      const err = createHttpError(400, "email is already exists!");
       throw err;
     }
 

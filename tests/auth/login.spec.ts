@@ -156,7 +156,8 @@ describe("POST /auth/login", () => {
 
       // Assert
       // expect(refreshTokens).toHaveLength(1);
-      expect(tokens).toHaveLength(1);
+      // expect(tokens).toHaveLength(1);
+      expect(tokens).toHaveLength(2);
     });
   });
 

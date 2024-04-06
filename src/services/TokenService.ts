@@ -36,12 +36,16 @@ export class TokenService {
     try {
       const refreshTokenData = await this.persistRefreshToken(user);
 
-      const refreshToken = sign(payload, Config.REFRESH_TOKEN_SECRET!, {
-        algorithm: "HS256",
-        expiresIn: "1y",
-        issuer: "auth-service",
-        jwtid: String(refreshTokenData.id),
-      });
+      const refreshToken = sign(
+        { ...payload, id: String(refreshTokenData.id) },
+        Config.REFRESH_TOKEN_SECRET!,
+        {
+          algorithm: "HS256",
+          expiresIn: "1y",
+          issuer: "auth-service",
+          jwtid: String(refreshTokenData.id),
+        },
+      );
 
       return refreshToken;
     } catch (err) {
@@ -81,6 +85,15 @@ export class TokenService {
         .from(RefreshToken)
         .where("userId = :userId", { userId })
         .execute();
+    } catch (err) {
+      const error = createHttpError(500, "database error");
+      throw error;
+    }
+  }
+
+  async revokeRefreshToken(tokenId: number) {
+    try {
+      return await this.refreshTokenRepository.delete({ id: tokenId });
     } catch (err) {
       const error = createHttpError(500, "database error");
       throw error;
