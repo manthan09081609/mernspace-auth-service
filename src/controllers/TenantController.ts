@@ -1,6 +1,6 @@
 import { Logger } from "winston";
 import { validationResult } from "express-validator";
-import { NextFunction, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 
 import { CreateTenantRequest } from "../types";
 import { TenantService } from "../services/TenantService";
@@ -31,6 +31,19 @@ export class TenantController {
       });
 
       res.status(201).json({ id: tenant.id });
+    } catch (err) {
+      next(err);
+      return;
+    }
+  }
+
+  async getTenants(req: Request, res: Response, next: NextFunction) {
+    this.logger.debug("new request to get tenants list");
+
+    try {
+      const tenants = await this.tenanService.getTenants();
+
+      res.status(200).json({ tenants });
     } catch (err) {
       next(err);
       return;

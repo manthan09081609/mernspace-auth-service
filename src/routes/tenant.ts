@@ -20,12 +20,19 @@ const tenantController = new TenantController(tenantService, logger);
 const router = express.Router();
 
 router.post(
-  "/",
+  "/create",
   createTenantValidator,
   authenticate,
   canAccess([Roles.ADMIN]),
   (req: Request, res: Response, next: NextFunction) =>
     tenantController.create(req as AuthRequest, res, next),
+);
+
+router.get(
+  "/",
+  authenticate,
+  (req: Request, res: Response, next: NextFunction) =>
+    tenantController.getTenants(req as AuthRequest, res, next),
 );
 
 export default router;
