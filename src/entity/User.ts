@@ -28,7 +28,11 @@ export class User {
   @Column()
   role: string;
 
-  @ManyToOne(() => Tenant, { nullable: true })
+  @ManyToOne(() => Tenant, {
+    nullable: true,
+    onDelete: "SET NULL",
+    onUpdate: "CASCADE",
+  })
   tenant: Tenant;
 
   @UpdateDateColumn()
