@@ -4,11 +4,11 @@ import { DataSource } from "typeorm";
 import { AppDataSource } from "../../src/config/data-source";
 import app from "../../src/app";
 import { Tenant } from "../../src/entity/Tenant";
-import { Roles } from "../../src/constants";
 import { User } from "../../src/entity/User";
+import { Roles } from "../../src/constants";
 import createJWKSMock, { JWKSMock } from "mock-jwks";
 
-describe("GET /tenants/:id", () => {
+describe("GET /users/:id", () => {
   let connection: DataSource;
   let jwks: JWKSMock;
 
@@ -34,35 +34,44 @@ describe("GET /tenants/:id", () => {
   describe("All fields given", () => {
     it("should return 200 status code", async () => {
       // Arrange
-      const userData = {
+      const managerData = {
         firstName: "Manthan",
         lastName: "Sharma",
         email: "manthan@gmail.com",
         password: "password",
-        role: Roles.ADMIN,
+        role: Roles.MANAGER,
       };
+
       const tenantData = {
         name: "tenant",
         address: "tenantAddress",
       };
 
-      // Act
+      const adminData = {
+        firstName: "admin",
+        lastName: "1",
+        email: "admin@gmail.com",
+        password: "password",
+        role: Roles.ADMIN,
+      };
       const userRepository = connection.getRepository(User);
-      const admin = await userRepository.save(userData);
-
       const tenantRepository = connection.getRepository(Tenant);
+
+      const admin = await userRepository.save(adminData);
+      const tenant = await tenantRepository.save(tenantData);
 
       const accessToken = jwks.token({
         sub: String(admin.id),
         role: admin.role,
       });
 
-      const tenant = await tenantRepository.save(tenantData);
-
-      // Act
+      const manager = await userRepository.save({
+        ...managerData,
+        tenant: { id: tenant.id },
+      });
 
       const response = await request(app)
-        .get(`/tenants/${tenant.id}`)
+        .get(`/users/${manager.id}`)
         .set("Cookie", [`accessToken=${accessToken}`])
         .send();
 
@@ -70,199 +79,207 @@ describe("GET /tenants/:id", () => {
       expect(response.statusCode).toBe(200);
     });
 
-    it("should return a tenant", async () => {
+    it("should return a user", async () => {
       // Arrange
-      const userData = {
+      const managerData = {
         firstName: "Manthan",
         lastName: "Sharma",
         email: "manthan@gmail.com",
         password: "password",
-        role: Roles.ADMIN,
+        role: Roles.MANAGER,
       };
+
       const tenantData = {
         name: "tenant",
         address: "tenantAddress",
       };
 
-      // Act
+      const adminData = {
+        firstName: "admin",
+        lastName: "1",
+        email: "admin@gmail.com",
+        password: "password",
+        role: Roles.ADMIN,
+      };
       const userRepository = connection.getRepository(User);
-      const admin = await userRepository.save(userData);
-
       const tenantRepository = connection.getRepository(Tenant);
+
+      const admin = await userRepository.save(adminData);
+      const tenant = await tenantRepository.save(tenantData);
 
       const accessToken = jwks.token({
         sub: String(admin.id),
         role: admin.role,
       });
 
-      const tenant = await tenantRepository.save(tenantData);
-
-      // Act
+      const manager = await userRepository.save({
+        ...managerData,
+        tenant: { id: tenant.id },
+      });
 
       const response = await request(app)
-        .get(`/tenants/${tenant.id}`)
+        .get(`/users/${manager.id}`)
         .set("Cookie", [`accessToken=${accessToken}`])
         .send();
 
       // Assert
-      expect((response.body as Record<string, string>).name).toBe(
-        tenantData.name,
+      expect((response.body as Record<string, string>).firstName).toBe(
+        managerData.firstName,
       );
-      expect((response.body as Record<string, string>).address).toBe(
-        tenantData.address,
+      expect((response.body as Record<string, string>).lastName).toBe(
+        managerData.lastName,
+      );
+      expect((response.body as Record<string, string>).email).toBe(
+        managerData.email,
+      );
+      expect((response.body as Record<string, string>).role).toBe(
+        managerData.role,
       );
     });
 
     it.skip("should return 401 status code if user is not authenticated", async () => {
       // Arrange
-      const userData = {
-        firstName: "Manthan",
-        lastName: "Sharma",
-        email: "manthan@gmail.com",
+
+      const adminData = {
+        firstName: "admin",
+        lastName: "1",
+        email: "admin@gmail.com",
         password: "password",
         role: Roles.ADMIN,
       };
-
-      // Act
       const userRepository = connection.getRepository(User);
-      const admin = await userRepository.save(userData);
 
-      const tenantRepository = connection.getRepository(Tenant);
+      const admin = await userRepository.save(adminData);
 
       const accessToken = jwks.token({
         sub: String(admin.id),
         role: admin.role,
       });
 
-      const tenantId = "1223";
-
-      // Act
+      const userId = 76274;
 
       const response = await request(app)
-        .get(`/tenants/${tenantId}}`)
+        .get(`/users/${userId}`)
         .set("Cookie", [`accessToken=${accessToken}`])
         .send();
-      const tenant = await tenantRepository.findOne({
-        where: { id: Number(tenantId) },
-      });
+
+      // Assert
 
       // Assert
       expect(response.statusCode).toBe(400);
-      expect(tenant).toBeNull();
     });
 
     it.skip("should return 403 status code if user is not admin", async () => {
       // Arrange
-      const userData = {
-        firstName: "Manthan",
-        lastName: "Sharma",
-        email: "manthan@gmail.com",
+
+      const adminData = {
+        firstName: "admin",
+        lastName: "1",
+        email: "admin@gmail.com",
         password: "password",
         role: Roles.ADMIN,
       };
-
-      // Act
       const userRepository = connection.getRepository(User);
-      const admin = await userRepository.save(userData);
 
-      const tenantRepository = connection.getRepository(Tenant);
+      const admin = await userRepository.save(adminData);
 
       const accessToken = jwks.token({
         sub: String(admin.id),
         role: admin.role,
       });
 
-      const tenantId = "1223";
-
-      // Act
+      const userId = 76274;
 
       const response = await request(app)
-        .get(`/tenants/${tenantId}}`)
+        .get(`/users/${userId}`)
         .set("Cookie", [`accessToken=${accessToken}`])
         .send();
-      const tenant = await tenantRepository.findOne({
-        where: { id: Number(tenantId) },
-      });
+
+      // Assert
 
       // Assert
       expect(response.statusCode).toBe(400);
-      expect(tenant).toBeNull();
     });
 
-    it("should return 400 status code if tennat id is not valid", async () => {
+    it("should return 400 status code if user id is not valid", async () => {
       // Arrange
-      const userData = {
+      const managerData = {
         firstName: "Manthan",
         lastName: "Sharma",
         email: "manthan@gmail.com",
         password: "password",
-        role: Roles.ADMIN,
+        role: Roles.MANAGER,
       };
+
       const tenantData = {
         name: "tenant",
         address: "tenantAddress",
       };
 
-      // Act
+      const adminData = {
+        firstName: "admin",
+        lastName: "1",
+        email: "admin@gmail.com",
+        password: "password",
+        role: Roles.ADMIN,
+      };
       const userRepository = connection.getRepository(User);
-      const admin = await userRepository.save(userData);
-
       const tenantRepository = connection.getRepository(Tenant);
+
+      const admin = await userRepository.save(adminData);
+      const tenant = await tenantRepository.save(tenantData);
 
       const accessToken = jwks.token({
         sub: String(admin.id),
         role: admin.role,
       });
 
-      await tenantRepository.save(tenantData);
-
-      // Act
+      await userRepository.save({
+        ...managerData,
+        tenant: { id: tenant.id },
+      });
 
       const response = await request(app)
-        .get(`/tenants/${"hdhgdh"}`)
+        .get(`/users/${"gdhd"}`)
         .set("Cookie", [`accessToken=${accessToken}`])
         .send();
+
+      // Assert
 
       // Assert
       expect(response.statusCode).toBe(400);
     });
 
-    it("should return 400 status code if tenant is not present", async () => {
+    it("should return 400 status code if user is not present", async () => {
       // Arrange
-      const userData = {
-        firstName: "Manthan",
-        lastName: "Sharma",
-        email: "manthan@gmail.com",
+
+      const adminData = {
+        firstName: "admin",
+        lastName: "1",
+        email: "admin@gmail.com",
         password: "password",
         role: Roles.ADMIN,
       };
-
-      // Act
       const userRepository = connection.getRepository(User);
-      const admin = await userRepository.save(userData);
 
-      const tenantRepository = connection.getRepository(Tenant);
+      const admin = await userRepository.save(adminData);
 
       const accessToken = jwks.token({
         sub: String(admin.id),
         role: admin.role,
       });
 
-      const tenantId = "1223";
-
-      // Act
+      const userId = 76274;
 
       const response = await request(app)
-        .get(`/tenants/${tenantId}}`)
+        .get(`/users/${userId}`)
         .set("Cookie", [`accessToken=${accessToken}`])
         .send();
-      const tenant = await tenantRepository.findOne({
-        where: { id: Number(tenantId) },
-      });
+
+      // Assert
 
       // Assert
       expect(response.statusCode).toBe(400);
-      expect(tenant).toBeNull();
     });
   });
 

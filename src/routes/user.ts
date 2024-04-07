@@ -3,56 +3,62 @@ import express, { NextFunction, Request, Response } from "express";
 import logger from "../config/logger";
 import { AppDataSource } from "../config/data-source";
 
-import { TenantController } from "../controllers/TenantController";
-import { TenantService } from "../services/TenantService";
-import { Tenant } from "../entity/Tenant";
 import authenticate from "../middlewares/authenticate";
-import { canAccess } from "../middlewares/canAccess";
 import { Roles } from "../constants";
 import { AuthRequest } from "../types";
-import idValidator from "../validators/id-validator";
-import tenantDataValidator from "../validators/tenant-data-validator";
+import { User } from "../entity/User";
+import { UserService } from "../services/UserService";
+import { UserController } from "../controllers/UserController";
 
+import { canCreate } from "../middlewares/canCreate";
+import { TenantService } from "../services/TenantService";
+import { Tenant } from "../entity/Tenant";
+import idValidator from "../validators/id-validator";
+import { canAccess } from "../middlewares/canAccess";
+import userDataValidator from "../validators/user-data-validator";
+import { canUpdate } from "../middlewares/canUpdate";
+
+const userRepository = AppDataSource.getRepository(User);
 const tenantRepository = AppDataSource.getRepository(Tenant);
 
+const userService = new UserService(userRepository);
 const tenantService = new TenantService(tenantRepository);
 
-const tenantController = new TenantController(tenantService, logger);
+const userController = new UserController(userService, tenantService, logger);
 
 const router = express.Router();
 
 router.post(
   "/create",
   authenticate,
-  canAccess([Roles.ADMIN]),
-  tenantDataValidator,
+  canCreate([Roles.ADMIN]),
+  userDataValidator,
   (req: Request, res: Response, next: NextFunction) =>
-    tenantController.create(req as AuthRequest, res, next),
+    userController.create(req as AuthRequest, res, next),
 );
 
 router.get("/", (req: Request, res: Response, next: NextFunction) =>
-  tenantController.getTenants(req, res, next),
+  userController.getUsers(req, res, next),
 );
 
 router.get(
   "/:id",
-
   authenticate,
   canAccess([Roles.ADMIN]),
   idValidator,
   (req: Request, res: Response, next: NextFunction) =>
-    tenantController.getTenantById(req, res, next),
+    userController.getUser(req, res, next),
 );
 
 router.patch(
   "/update/:id",
 
   authenticate,
-  canAccess([Roles.ADMIN, Roles.MANAGER]),
+  canUpdate([Roles.ADMIN, Roles.MANAGER]),
   idValidator,
-  tenantDataValidator,
+  userDataValidator,
   (req: Request, res: Response, next: NextFunction) =>
-    tenantController.update(req, res, next),
+    userController.update(req, res, next),
 );
 
 router.delete(
@@ -60,9 +66,8 @@ router.delete(
   authenticate,
   canAccess([Roles.ADMIN]),
   idValidator,
-
   (req: Request, res: Response, next: NextFunction) =>
-    tenantController.delete(req, res, next),
+    userController.delete(req, res, next),
 );
 
 export default router;

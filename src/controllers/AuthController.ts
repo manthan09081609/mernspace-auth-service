@@ -9,6 +9,7 @@ import { UserService } from "../services/UserService";
 import { TokenService } from "../services/TokenService";
 import createHttpError from "http-errors";
 import { CredentialService } from "../services/CredentialService";
+import { Roles } from "../constants";
 
 export class AuthController {
   constructor(
@@ -20,6 +21,7 @@ export class AuthController {
 
   async register(req: RegisterUserRequest, res: Response, next: NextFunction) {
     const result = validationResult(req);
+
     if (!result.isEmpty()) {
       return res.status(400).json({ errors: result.array() });
     }
@@ -39,6 +41,7 @@ export class AuthController {
         lastName,
         email,
         password,
+        role: Roles.CUSTOMER,
       });
       this.logger.info("user has been registered", { id: user.id });
 
@@ -88,7 +91,7 @@ export class AuthController {
     });
 
     try {
-      const user = await this.userService.findByEmail(email);
+      const user = await this.userService.findByEmailWithPassword(email);
 
       if (!user) {
         const err = createHttpError(400, "email or password does not match");

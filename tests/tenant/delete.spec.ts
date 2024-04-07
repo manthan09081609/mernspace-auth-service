@@ -8,7 +8,7 @@ import createJWKSMock, { JWKSMock } from "mock-jwks";
 import { User } from "../../src/entity/User";
 import { Roles } from "../../src/constants";
 
-describe("POST /tenants/delete/:id", () => {
+describe("DELETE /tenants/delete/:id", () => {
   let connection: DataSource;
   let jwks: JWKSMock;
 

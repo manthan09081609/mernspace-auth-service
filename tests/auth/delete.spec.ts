@@ -8,7 +8,7 @@ import { AppDataSource } from "../../src/config/data-source";
 import { isJwt } from "../utils";
 import { RefreshToken } from "../../src/entity/RefreshToken";
 
-describe.skip("POST /auth/delete", () => {
+describe.skip("DELETE /auth/delete", () => {
   let connection: DataSource;
 
   beforeAll(async () => {

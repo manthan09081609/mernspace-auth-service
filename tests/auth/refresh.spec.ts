@@ -11,7 +11,7 @@ import { RefreshToken } from "../../src/entity/RefreshToken";
 import { Config } from "../../src/config";
 import { isJwt } from "../utils";
 
-describe("GET /auth/refresh", () => {
+describe("POST /auth/refresh", () => {
   let connection: DataSource;
   let jwks: JWKSMock;
 

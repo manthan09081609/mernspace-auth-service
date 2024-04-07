@@ -4,15 +4,17 @@ export interface SearchParameters {
   id?: string;
 }
 
-export interface UserRegisterationData {
+export interface UserData {
   firstName: string;
   lastName: string;
   email: string;
   password: string;
+  role?: string;
+  tenantId?: number;
 }
 
 export interface RegisterUserRequest extends Request {
-  body: UserRegisterationData;
+  body: UserData;
 }
 
 export interface UserLoginData {
@@ -22,6 +24,23 @@ export interface UserLoginData {
 
 export interface LoginUserRequest extends Request {
   body: UserLoginData;
+}
+
+export interface CreateUserRequest {
+  body: UserData;
+}
+
+export interface UpdateUserData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  role?: string;
+  tenantId?: number;
+}
+
+export interface UpdateUserRequest {
+  body: UpdateUserData;
+  params: SearchParameters;
 }
 
 export interface TenantData {

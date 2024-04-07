@@ -76,7 +76,7 @@ export class TenantService {
     } catch (error) {
       const databaseError = createHttpError(
         500,
-        "failed to delete the user from database",
+        "failed to delete the tenant from database",
       );
       throw databaseError;
     }

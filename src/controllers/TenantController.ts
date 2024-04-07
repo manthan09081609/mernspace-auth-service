@@ -127,7 +127,7 @@ export class TenantController {
       const tenant = await this.tenanService.getTenant(Number(tenantId));
 
       if (!tenant) {
-        const error = createHttpError(400, "tenant is already deleted");
+        const error = createHttpError(400, "tenant is not present");
         return next(error);
       }
     } catch (error) {

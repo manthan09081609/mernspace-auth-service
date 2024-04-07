@@ -3,7 +3,7 @@ import { Repository } from "typeorm";
 import createHttpError from "http-errors";
 
 import { User } from "../entity/User";
-import { UserRegisterationData } from "../types";
+import { UpdateUserData, UserData } from "../types";
 import { Roles } from "../constants";
 
 export class UserService {
@@ -14,7 +14,14 @@ export class UserService {
     lastName,
     email,
     password,
-  }: UserRegisterationData) {
+    role,
+    tenantId,
+  }: UserData) {
+    if (role === Roles.MANAGER && !tenantId) {
+      const err = createHttpError(401, "tenantId is required");
+      throw err;
+    }
+
     let user;
     try {
       user = await this.userRepository.findOne({
@@ -38,7 +45,8 @@ export class UserService {
         lastName,
         email,
         password: hashedPassword,
-        role: Roles.CUSTOMER,
+        role,
+        tenant: tenantId ? { id: tenantId } : undefined,
       });
     } catch (error) {
       const databaseError = createHttpError(
@@ -49,21 +57,26 @@ export class UserService {
     }
   }
 
-  async findByEmail(email: string) {
-    try {
-      const user = await this.userRepository.findOne({
-        where: { email: email },
-      });
-      return user;
-    } catch (error) {
-      const err = createHttpError(500, "database error");
-      throw err;
-    }
+  async findByEmailWithPassword(email: string) {
+    return await this.userRepository.findOne({
+      where: {
+        email,
+      },
+      select: ["id", "firstName", "lastName", "email", "role", "password"],
+      relations: {
+        tenant: true,
+      },
+    });
   }
 
   async findById(id: number) {
     try {
-      const user = await this.userRepository.findOne({ where: { id: id } });
+      const user = await this.userRepository.findOne({
+        where: { id: id },
+        relations: {
+          tenant: true,
+        },
+      });
       return user;
     } catch (error) {
       const err = createHttpError(500, "database error");
@@ -78,6 +91,64 @@ export class UserService {
     } catch (error) {
       const err = createHttpError(500, "database error");
       throw err;
+    }
+  }
+
+  async getUsers() {
+    try {
+      return await this.userRepository.find({
+        relations: {
+          tenant: true,
+        },
+      });
+    } catch (error) {
+      const databaseError = createHttpError(500, "failed to get users");
+      throw databaseError;
+    }
+  }
+
+  async getUser(id: number) {
+    try {
+      return await this.userRepository.findOne({
+        where: { id: id },
+        relations: { tenant: true },
+      });
+    } catch (error) {
+      const databaseError = createHttpError(500, "failed to get user");
+      throw databaseError;
+    }
+  }
+
+  async update(
+    id: string,
+    { email, firstName, lastName, role, tenantId }: UpdateUserData,
+  ) {
+    try {
+      return await this.userRepository.update(id, {
+        email,
+        firstName,
+        lastName,
+        role,
+        tenant: tenantId ? { id: tenantId } : undefined,
+      });
+    } catch (error) {
+      const databaseError = createHttpError(
+        500,
+        "failed to update the user in database",
+      );
+      throw databaseError;
+    }
+  }
+
+  async delete(id: string) {
+    try {
+      return await this.userRepository.delete(Number(id));
+    } catch (error) {
+      const databaseError = createHttpError(
+        500,
+        "failed to delete the user from database",
+      );
+      throw databaseError;
     }
   }
 }

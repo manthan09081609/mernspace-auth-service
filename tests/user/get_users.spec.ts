@@ -4,8 +4,10 @@ import { DataSource } from "typeorm";
 import { AppDataSource } from "../../src/config/data-source";
 import app from "../../src/app";
 import { Tenant } from "../../src/entity/Tenant";
+import { Roles } from "../../src/constants";
+import { User } from "../../src/entity/User";
 
-describe("GET /tenants", () => {
+describe("GET /users", () => {
   let connection: DataSource;
 
   beforeAll(async () => {
@@ -27,24 +29,38 @@ describe("GET /tenants", () => {
 
       // Act
 
-      const response = await request(app).get("/tenants").send();
+      const response = await request(app).get("/users").send();
 
       // Assert
       expect(response.statusCode).toBe(200);
     });
 
-    it("should return a list of tenants", async () => {
+    it("should return a list of users", async () => {
       // Arrange
+      const managerData = {
+        firstName: "Manthan",
+        lastName: "Sharma",
+        email: "manthan@gmail.com",
+        password: "password",
+        role: Roles.MANAGER,
+      };
+
       const tenantData = {
         name: "tenant",
         address: "tenantAddress",
       };
 
-      // Act
+      const userRepository = connection.getRepository(User);
       const tenantRepository = connection.getRepository(Tenant);
 
-      await tenantRepository.save(tenantData);
-      const response = await request(app).get("/tenants").send();
+      const tenant = await tenantRepository.save(tenantData);
+
+      await userRepository.save({ ...managerData, tenant: { id: tenant.id } });
+
+      // Act
+
+      const response = await request(app).get("/users").send();
+
       const tenants = await tenantRepository.find();
 
       // Assert
