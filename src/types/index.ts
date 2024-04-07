@@ -20,6 +20,15 @@ export interface LoginUserRequest extends Request {
   body: UserLoginData;
 }
 
+export interface TenantCreateData {
+  name: string;
+  address: string;
+}
+
+export interface CreateTenantRequest {
+  body: TenantCreateData;
+}
+
 export interface RefreshTokenData {
   id: number;
 }

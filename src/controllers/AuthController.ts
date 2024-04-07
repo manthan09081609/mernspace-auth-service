@@ -212,4 +212,20 @@ export class AuthController {
       return next(err);
     }
   }
+
+  async delete(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      await this.tokenService.deleteRefreshTokens(Number(req.auth.sub));
+      await this.userService.deleteById(Number(req.auth.sub));
+
+      this.logger.info("user account has been deleted", { id: req.auth.sub });
+
+      res.clearCookie("accessToken");
+      res.clearCookie("refreshToken");
+
+      return res.status(200).json({});
+    } catch (err) {
+      return next(err);
+    }
+  }
 }

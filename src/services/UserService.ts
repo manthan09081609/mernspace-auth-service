@@ -70,4 +70,14 @@ export class UserService {
       throw err;
     }
   }
+
+  async deleteById(id: number) {
+    try {
+      const user = await this.userRepository.delete({ id: id });
+      return user;
+    } catch (error) {
+      const err = createHttpError(500, "database error");
+      throw err;
+    }
+  }
 }
