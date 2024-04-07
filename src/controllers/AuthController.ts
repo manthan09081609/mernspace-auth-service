@@ -26,7 +26,7 @@ export class AuthController {
 
     const { firstName, lastName, email, password } = req.body;
 
-    this.logger.debug("new request to register a user", {
+    this.logger.info("new request to register a user", {
       firstName,
       lastName,
       email,
@@ -82,7 +82,7 @@ export class AuthController {
 
     const { email, password } = req.body;
 
-    this.logger.debug("request to login a user", {
+    this.logger.info("request to login a user", {
       email,
       password: "*******",
     });
@@ -215,7 +215,7 @@ export class AuthController {
 
   async delete(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      await this.tokenService.deleteRefreshTokens(Number(req.auth.sub));
+      // await this.tokenService.deleteRefreshTokens(Number(req.auth.sub));
       await this.userService.deleteById(Number(req.auth.sub));
 
       this.logger.info("user account has been deleted", { id: req.auth.sub });

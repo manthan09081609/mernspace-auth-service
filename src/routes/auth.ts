@@ -71,9 +71,9 @@ router.post(
     authController.logout(req as AuthRequest, res, next),
 );
 
-router.post(
+router.delete(
   "/delete",
-  [authenticate, parseRefreshToken],
+  authenticate,
   (req: Request, res: Response, next: NextFunction) =>
     authController.delete(req as AuthRequest, res, next),
 );
