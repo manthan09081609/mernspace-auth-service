@@ -14,10 +14,6 @@ import { isJwt } from "../utils";
 describe("GET /auth/refresh", () => {
   let connection: DataSource;
   let jwks: JWKSMock;
-  let user: User;
-  let refreshTokenData: RefreshToken;
-  let accessToken: string;
-  let refreshToken: string;
 
   beforeAll(async () => {
     jwks = createJWKSMock("http:localhost:5501");
@@ -28,42 +24,6 @@ describe("GET /auth/refresh", () => {
     jwks.start();
     await connection.dropDatabase();
     await connection.synchronize();
-
-    const userData = {
-      firstName: "Manthan",
-      lastName: "Sharma",
-      email: "manthan@gmail.com",
-      password: "password",
-      role: Roles.CUSTOMER,
-    };
-
-    const userRepository = connection.getRepository(User);
-    const refreshTokenRepository = connection.getRepository(RefreshToken);
-    const MS_IN_YEAR = 1000 * 60 * 60 * 24 * 365;
-
-    user = await userRepository.save(userData);
-    refreshTokenData = await refreshTokenRepository.save({
-      user: user,
-      expiresAt: new Date(Date.now() + MS_IN_YEAR),
-    });
-
-    const payload = {
-      sub: String(user.id),
-      role: user.role,
-    };
-
-    accessToken = jwks.token(payload);
-
-    refreshToken = sign(
-      { ...payload, id: String(refreshTokenData.id) },
-      Config.REFRESH_TOKEN_SECRET!,
-      {
-        algorithm: "HS256",
-        expiresIn: "1y",
-        issuer: "auth-service",
-        jwtid: String(refreshTokenData.id),
-      },
-    );
   });
 
   afterEach(() => {
@@ -77,6 +37,41 @@ describe("GET /auth/refresh", () => {
   describe("All fields given", () => {
     it("should return 200 status code", async () => {
       // Arrange
+      const userData = {
+        firstName: "Manthan",
+        lastName: "Sharma",
+        email: "manthan@gmail.com",
+        password: "password",
+        role: Roles.CUSTOMER,
+      };
+
+      const userRepository = connection.getRepository(User);
+      const refreshTokenRepository = connection.getRepository(RefreshToken);
+      const MS_IN_YEAR = 1000 * 60 * 60 * 24 * 365;
+
+      const user = await userRepository.save(userData);
+      const refreshTokenData = await refreshTokenRepository.save({
+        user: user,
+        expiresAt: new Date(Date.now() + MS_IN_YEAR),
+      });
+
+      const payload = {
+        sub: String(user.id),
+        role: user.role,
+      };
+
+      const accessToken = jwks.token(payload);
+
+      const refreshToken = sign(
+        { ...payload, id: String(refreshTokenData.id) },
+        Config.REFRESH_TOKEN_SECRET!,
+        {
+          algorithm: "HS256",
+          expiresIn: "1y",
+          issuer: "auth-service",
+          jwtid: String(refreshTokenData.id),
+        },
+      );
 
       // Act
       const response = await request(app)
@@ -92,8 +87,42 @@ describe("GET /auth/refresh", () => {
     });
 
     it("should return 401 status code if token is revoked", async () => {
-      // Arrange
+      const userData = {
+        firstName: "Manthan",
+        lastName: "Sharma",
+        email: "manthan@gmail.com",
+        password: "password",
+        role: Roles.CUSTOMER,
+      };
+
+      const userRepository = connection.getRepository(User);
       const refreshTokenRepository = connection.getRepository(RefreshToken);
+      const MS_IN_YEAR = 1000 * 60 * 60 * 24 * 365;
+
+      const user = await userRepository.save(userData);
+      const refreshTokenData = await refreshTokenRepository.save({
+        user: user,
+        expiresAt: new Date(Date.now() + MS_IN_YEAR),
+      });
+
+      const payload = {
+        sub: String(user.id),
+        role: user.role,
+      };
+
+      const accessToken = jwks.token(payload);
+
+      const refreshToken = sign(
+        { ...payload, id: String(refreshTokenData.id) },
+        Config.REFRESH_TOKEN_SECRET!,
+        {
+          algorithm: "HS256",
+          expiresIn: "1y",
+          issuer: "auth-service",
+          jwtid: String(refreshTokenData.id),
+        },
+      );
+
       await refreshTokenRepository
         .createQueryBuilder()
         .delete()
@@ -116,6 +145,41 @@ describe("GET /auth/refresh", () => {
 
     it("should return id of the user", async () => {
       // Arrange
+      const userData = {
+        firstName: "Manthan",
+        lastName: "Sharma",
+        email: "manthan@gmail.com",
+        password: "password",
+        role: Roles.CUSTOMER,
+      };
+
+      const userRepository = connection.getRepository(User);
+      const refreshTokenRepository = connection.getRepository(RefreshToken);
+      const MS_IN_YEAR = 1000 * 60 * 60 * 24 * 365;
+
+      const user = await userRepository.save(userData);
+      const refreshTokenData = await refreshTokenRepository.save({
+        user: user,
+        expiresAt: new Date(Date.now() + MS_IN_YEAR),
+      });
+
+      const payload = {
+        sub: String(user.id),
+        role: user.role,
+      };
+
+      const accessToken = jwks.token(payload);
+
+      const refreshToken = sign(
+        { ...payload, id: String(refreshTokenData.id) },
+        Config.REFRESH_TOKEN_SECRET!,
+        {
+          algorithm: "HS256",
+          expiresIn: "1y",
+          issuer: "auth-service",
+          jwtid: String(refreshTokenData.id),
+        },
+      );
 
       // Act
       const response = await request(app)
@@ -133,6 +197,41 @@ describe("GET /auth/refresh", () => {
 
     it("should return access & refresh token in cookies", async () => {
       // Arrange
+      const userData = {
+        firstName: "Manthan",
+        lastName: "Sharma",
+        email: "manthan@gmail.com",
+        password: "password",
+        role: Roles.CUSTOMER,
+      };
+
+      const userRepository = connection.getRepository(User);
+      const refreshTokenRepository = connection.getRepository(RefreshToken);
+      const MS_IN_YEAR = 1000 * 60 * 60 * 24 * 365;
+
+      const user = await userRepository.save(userData);
+      const refreshTokenData = await refreshTokenRepository.save({
+        user: user,
+        expiresAt: new Date(Date.now() + MS_IN_YEAR),
+      });
+
+      const payload = {
+        sub: String(user.id),
+        role: user.role,
+      };
+
+      const accessToken = jwks.token(payload);
+
+      const refreshToken = sign(
+        { ...payload, id: String(refreshTokenData.id) },
+        Config.REFRESH_TOKEN_SECRET!,
+        {
+          algorithm: "HS256",
+          expiresIn: "1y",
+          issuer: "auth-service",
+          jwtid: String(refreshTokenData.id),
+        },
+      );
 
       // Act
       const response = await request(app)
@@ -171,9 +270,43 @@ describe("GET /auth/refresh", () => {
 
     it("should delete the previous refresh token & persist new one", async () => {
       // Arrange
+      const userData = {
+        firstName: "Manthan",
+        lastName: "Sharma",
+        email: "manthan@gmail.com",
+        password: "password",
+        role: Roles.CUSTOMER,
+      };
+
+      const userRepository = connection.getRepository(User);
+      const refreshTokenRepository = connection.getRepository(RefreshToken);
+      const MS_IN_YEAR = 1000 * 60 * 60 * 24 * 365;
+
+      const user = await userRepository.save(userData);
+      const refreshTokenData = await refreshTokenRepository.save({
+        user: user,
+        expiresAt: new Date(Date.now() + MS_IN_YEAR),
+      });
+
+      const payload = {
+        sub: String(user.id),
+        role: user.role,
+      };
+
+      const accessToken = jwks.token(payload);
+
+      const refreshToken = sign(
+        { ...payload, id: String(refreshTokenData.id) },
+        Config.REFRESH_TOKEN_SECRET!,
+        {
+          algorithm: "HS256",
+          expiresIn: "1y",
+          issuer: "auth-service",
+          jwtid: String(refreshTokenData.id),
+        },
+      );
 
       // Act
-      const refreshTokenRepository = connection.getRepository(RefreshToken);
 
       await request(app)
         .post("/auth/refresh")

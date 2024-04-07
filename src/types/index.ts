@@ -1,5 +1,9 @@
 import { Request } from "express";
 
+export interface SearchParameters {
+  id?: string;
+}
+
 export interface UserRegisterationData {
   firstName: string;
   lastName: string;
@@ -20,13 +24,18 @@ export interface LoginUserRequest extends Request {
   body: UserLoginData;
 }
 
-export interface TenantCreateData {
+export interface TenantData {
   name: string;
   address: string;
 }
 
 export interface CreateTenantRequest {
-  body: TenantCreateData;
+  body: TenantData;
+}
+
+export interface UpdateTenantRequest {
+  body: TenantData;
+  params: SearchParameters;
 }
 
 export interface RefreshTokenData {

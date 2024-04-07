@@ -2,7 +2,7 @@ import express, { NextFunction, Request, Response } from "express";
 
 import logger from "../config/logger";
 import { AppDataSource } from "../config/data-source";
-import createTenantValidator from "../validators/create-tenant-validator";
+
 import { TenantController } from "../controllers/TenantController";
 import { TenantService } from "../services/TenantService";
 import { Tenant } from "../entity/Tenant";
@@ -10,6 +10,8 @@ import authenticate from "../middlewares/authenticate";
 import { canAccess } from "../middlewares/canAccess";
 import { Roles } from "../constants";
 import { AuthRequest } from "../types";
+import idValidator from "../validators/id-validator";
+import tenantDataValidator from "../validators/tenant-data-validator";
 
 const tenantRepository = AppDataSource.getRepository(Tenant);
 
@@ -21,18 +23,41 @@ const router = express.Router();
 
 router.post(
   "/create",
-  createTenantValidator,
+  tenantDataValidator,
   authenticate,
   canAccess([Roles.ADMIN]),
   (req: Request, res: Response, next: NextFunction) =>
     tenantController.create(req as AuthRequest, res, next),
 );
 
+router.get("/", (req: Request, res: Response, next: NextFunction) =>
+  tenantController.getTenants(req, res, next),
+);
+
 router.get(
-  "/",
-  authenticate,
+  "/:id",
+  idValidator,
   (req: Request, res: Response, next: NextFunction) =>
-    tenantController.getTenants(req as AuthRequest, res, next),
+    tenantController.getTenantById(req, res, next),
+);
+
+router.patch(
+  "/update/:id",
+  idValidator,
+  tenantDataValidator,
+  authenticate,
+  canAccess([Roles.ADMIN, Roles.MANAGER]),
+  (req: Request, res: Response, next: NextFunction) =>
+    tenantController.update(req, res, next),
+);
+
+router.delete(
+  "/delete/:id",
+  idValidator,
+  authenticate,
+  canAccess([Roles.ADMIN]),
+  (req: Request, res: Response, next: NextFunction) =>
+    tenantController.delete(req, res, next),
 );
 
 export default router;

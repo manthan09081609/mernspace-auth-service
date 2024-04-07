@@ -10,8 +10,6 @@ import { Roles } from "../../src/constants";
 describe("GET /auth/self", () => {
   let connection: DataSource;
   let jwks: JWKSMock;
-  let user: User;
-  let accessToken: string;
 
   beforeAll(async () => {
     jwks = createJWKSMock("http:localhost:5501");
@@ -22,22 +20,6 @@ describe("GET /auth/self", () => {
     jwks.start();
     await connection.dropDatabase();
     await connection.synchronize();
-
-    const userData = {
-      firstName: "Manthan",
-      lastName: "Sharma",
-      email: "manthan@gmail.com",
-      password: "password",
-      role: Roles.CUSTOMER,
-    };
-
-    const userRepository = connection.getRepository(User);
-    user = await userRepository.save(userData);
-
-    accessToken = jwks.token({
-      sub: String(user.id),
-      role: user.role,
-    });
   });
 
   afterEach(() => {
@@ -51,6 +33,21 @@ describe("GET /auth/self", () => {
   describe("All fields given", () => {
     it("should return 200 status code", async () => {
       // Arrange
+      const userData = {
+        firstName: "Manthan",
+        lastName: "Sharma",
+        email: "manthan@gmail.com",
+        password: "password",
+        role: Roles.CUSTOMER,
+      };
+
+      const userRepository = connection.getRepository(User);
+      const user = await userRepository.save(userData);
+
+      const accessToken = jwks.token({
+        sub: String(user.id),
+        role: user.role,
+      });
 
       // Act
       const response = await request(app)
@@ -77,6 +74,21 @@ describe("GET /auth/self", () => {
 
     it("should return user data", async () => {
       // Arrange
+      const userData = {
+        firstName: "Manthan",
+        lastName: "Sharma",
+        email: "manthan@gmail.com",
+        password: "password",
+        role: Roles.CUSTOMER,
+      };
+
+      const userRepository = connection.getRepository(User);
+      const user = await userRepository.save(userData);
+
+      const accessToken = jwks.token({
+        sub: String(user.id),
+        role: user.role,
+      });
 
       // Act
       const response = await request(app)
@@ -90,6 +102,21 @@ describe("GET /auth/self", () => {
 
     it("should return not return the password field", async () => {
       // Arrange
+      const userData = {
+        firstName: "Manthan",
+        lastName: "Sharma",
+        email: "manthan@gmail.com",
+        password: "password",
+        role: Roles.CUSTOMER,
+      };
+
+      const userRepository = connection.getRepository(User);
+      const user = await userRepository.save(userData);
+
+      const accessToken = jwks.token({
+        sub: String(user.id),
+        role: user.role,
+      });
 
       // Act
       const response = await request(app)
