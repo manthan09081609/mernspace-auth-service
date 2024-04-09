@@ -84,6 +84,18 @@ export class UserService {
     }
   }
 
+  async findByIdWithPassword(id: number) {
+    return await this.userRepository.findOne({
+      where: {
+        id,
+      },
+      select: ["id", "firstName", "lastName", "email", "role", "password"],
+      relations: {
+        tenant: true,
+      },
+    });
+  }
+
   async deleteById(id: number) {
     try {
       const user = await this.userRepository.delete({ id: id });
@@ -135,6 +147,23 @@ export class UserService {
       const databaseError = createHttpError(
         500,
         "failed to update the user in database",
+      );
+      throw databaseError;
+    }
+  }
+
+  async updatePassword(id: string, password: string) {
+    try {
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+      return await this.userRepository.update(id, {
+        password: hashedPassword,
+      });
+    } catch (error) {
+      const databaseError = createHttpError(
+        500,
+        "failed to update the password",
       );
       throw databaseError;
     }

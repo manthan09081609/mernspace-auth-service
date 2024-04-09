@@ -31,9 +31,9 @@ export interface CreateUserRequest {
 }
 
 export interface UpdateUserData {
-  firstName: string;
-  lastName: string;
-  email: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
   role?: string;
   tenantId?: number;
 }
@@ -41,6 +41,34 @@ export interface UpdateUserData {
 export interface UpdateUserRequest {
   body: UpdateUserData;
   params: SearchParameters;
+}
+
+export interface Auth {
+  id?: string;
+  sub: string;
+  role: string;
+}
+
+export interface UpdateUserAuthRequest {
+  body: UpdateUserData;
+  auth: Auth;
+}
+
+export interface PasswordUpdate {
+  oldPassword: string;
+  newPassword: string;
+}
+
+export interface UpdateUserPasswordRequest {
+  body: PasswordUpdate;
+  auth: Auth;
+}
+
+export interface GeneratePasswordRequest {
+  body: {
+    password: string;
+  };
+  auth: Auth;
 }
 
 export interface TenantData {
@@ -62,11 +90,7 @@ export interface RefreshTokenData {
 }
 
 export interface AuthRequest extends Request {
-  auth: {
-    id?: string;
-    sub: string;
-    role: string;
-  };
+  auth: Auth;
 }
 
 export interface AuthCookie {

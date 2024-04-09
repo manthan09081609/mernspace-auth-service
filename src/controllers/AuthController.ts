@@ -3,7 +3,14 @@ import { validationResult } from "express-validator";
 import { NextFunction, Response } from "express";
 import { JwtPayload } from "jsonwebtoken";
 
-import { AuthRequest, LoginUserRequest, RegisterUserRequest } from "../types";
+import {
+  AuthRequest,
+  GeneratePasswordRequest,
+  LoginUserRequest,
+  RegisterUserRequest,
+  UpdateUserAuthRequest,
+  UpdateUserPasswordRequest,
+} from "../types";
 import { UserService } from "../services/UserService";
 
 import { TokenService } from "../services/TokenService";
@@ -229,6 +236,118 @@ export class AuthController {
       return res.status(200).json({});
     } catch (err) {
       return next(err);
+    }
+  }
+
+  async update(req: UpdateUserAuthRequest, res: Response, next: NextFunction) {
+    try {
+      const result = validationResult(req);
+      if (!result.isEmpty()) {
+        return res.status(400).json({ errors: result.array() });
+      }
+
+      const { email, firstName, lastName } = req.body;
+      await this.userService.update(req.auth.sub, {
+        email: email,
+        firstName: firstName,
+        lastName: lastName,
+      });
+      this.logger.info("user account has been updated", { id: req.auth.sub });
+
+      return res.status(200).json({ id: req.auth.sub });
+    } catch (err) {
+      return next(err);
+    }
+  }
+
+  async updatePassword(
+    req: UpdateUserPasswordRequest,
+    res: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const result = validationResult(req);
+      if (!result.isEmpty()) {
+        return res.status(400).json({ errors: result.array() });
+      }
+
+      const { oldPassword, newPassword } = req.body;
+
+      if (oldPassword === newPassword) {
+        const err = createHttpError(
+          400,
+          "new password & old password can be same",
+        );
+        return next(err);
+      }
+
+      const user = await this.userService.findByIdWithPassword(
+        Number(req.auth.sub),
+      );
+
+      if (!user) {
+        const err = createHttpError(400, "user not registered");
+        return next(err);
+      }
+
+      const passwordMatch = await this.credentialService.comparePassword(
+        oldPassword,
+        user.password,
+      );
+
+      if (!passwordMatch) {
+        const err = createHttpError(400, "wrong old password");
+        return next(err);
+      }
+
+      await this.userService.updatePassword(req.auth.sub, newPassword);
+
+      this.logger.info("user password has been updated", { id: user.id });
+
+      res.status(200).json({ id: user.id });
+    } catch (err) {
+      next(err);
+      return;
+    }
+  }
+
+  async forgotPassword(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const user = this.userService.findById(Number(req.auth.sub));
+
+      if (!user) {
+        const err = createHttpError(400, "user not registered");
+        return next(err);
+      }
+
+      // front end redirect url
+      res.redirect(302, "/auth/generate-new-password");
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  async generateNewPassword(
+    req: GeneratePasswordRequest,
+    res: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const result = validationResult(req);
+      if (!result.isEmpty()) {
+        return res.status(400).json({ errors: result.array() });
+      }
+
+      const { password } = req.body;
+
+      await this.userService.updatePassword(req.auth.sub, password);
+
+      this.logger.info("user password has been updated", { id: req.auth.sub });
+
+      res.status(200).json({ id: req.auth.sub });
+    } catch (err) {
+      next(err);
+      return;
     }
   }
 }
